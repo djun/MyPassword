@@ -70,6 +70,13 @@ class PasswordGroup:
         # 清空密码集
         self._pwd_list.clear()
         self._pwd_list.clear()
+    
+    def rename(self, pwd, new_name):
+        # 密码项改名
+        if pwd.name in self._pwd_dict and new_name not in self._pwd_dict:
+            self._pwd_dict.pop(pwd.name)
+            pwd.name = new_name
+            self._pwd_dict[pwd.name] = pwd
 
     def load_from_file(self, file_name=DATA_FILE_NAME):
         # 从文件读取数据
@@ -174,9 +181,14 @@ class PasswordApp:
                     item_key = Password.PROP_KEY_LIST[item_index]
                     item_name = Password.PROP_NAME_LIST[item_index]
                     
-                    # 接收到新值后直接存入密码项中，密码项的引用还在密码集中，故不用进行其他额外操作
-                    value = input('请为项目“{}”输入新的内容：'.format(item_name))
-                    setattr(pwd_item, item_key, value)
+                    original_value = getattr(pwd_item, item_key)
+                    new_value = input('请为项目“{}”输入新的内容（原为“{}”）：'.format(item_name, original_value))
+                    if item_index == 0 and original_value != new_value:
+                        # 改名操作较特殊（涉及字典处理），使用单独的方法处理
+                        self._pwd_group.rename(pwd_item, new_value)
+                    else:
+                        # 接收到新值后直接存入密码项中，密码项的引用还在密码集中，故不用进行其他额外操作
+                        setattr(pwd_item, item_key, new_value)
                     
                     # 密码集操作（修改），保存数据到文件
                     self._pwd_group.save_to_file()
