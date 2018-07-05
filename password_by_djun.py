@@ -160,6 +160,7 @@ class PasswordApp:
             if not pwd_item:
                 print('查询不到名称为“{}”的密码信息。'.format(data_in))
                 return
+            pwd_name = data_in
 
             print('该密码当前信息如下：')
             self.print_pwd(pwd_item)
@@ -186,9 +187,10 @@ class PasswordApp:
                     if item_index == 0 and original_value != new_value:
                         # 改名操作较特殊（涉及字典处理），使用单独的方法处理
                         self._pwd_group.rename(pwd_item, new_value)
+                        pwd_name = new_value
                     else:
                         # 接收到新值后直接存入密码项中，密码项的引用还在密码集中，故不用进行其他额外操作
-                        setattr(pwd_item, item_key, new_value)
+                        self._pwd_group.set_pwd(pwd_name, item_key, new_value)
                     
                     # 密码集操作（修改），保存数据到文件
                     self._pwd_group.save_to_file()
